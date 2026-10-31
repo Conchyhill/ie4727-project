@@ -1,0 +1,3 @@
+﻿# Files uploaded through the site (covers, profile photos)
+uploads/*/*
+!uploads/*/.gitkeep
