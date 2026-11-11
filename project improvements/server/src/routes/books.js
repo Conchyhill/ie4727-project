@@ -1,5 +1,7 @@
-// Books: browse/search, book details, reviews, the chapter reader, and creating/editing books
-// and chapters (replaces browse.php, book.php, read.php and create.php).
+// Books: browse/search, book details, reviews, the chapter reader, and creating/editing/deleting books
+// and chapters (replaces browse.php, book.php, read.php, create.php and delete_action.php).
+// Who may delete: a book -> its author or the admin, only while nobody has bought it;
+// a chapter -> the author or the admin; a review -> its writer or the admin. Only authors edit.
 import { Router } from 'express';
 import { hasErrors, normaliseSerial, SORTS, validateBook, validateChapter, validateReview } from '@novel/shared';
 import { all, get, NOW, run, TODAY, transaction } from '../db.js';
@@ -9,6 +11,14 @@ import { deleteUpload, imageField, saveImage } from '../uploads.js';
 const router = Router();
 const PER_PAGE = 10;
 const AVG_RATING = '(SELECT AVG(r.rating) FROM reviews r WHERE r.book_id = b.id)';
+const SALES = `(SELECT COUNT(*) FROM order_items oi JOIN orders o ON o.id = oi.order_id
+                WHERE oi.book_id = b.id AND o.status = 'success')`;
+
+// Successful sales of a book; a sold book can't be deleted (buyers would lose it)
+const salesOf = (bookId) => get(`SELECT ${SALES} AS n FROM books b WHERE b.id = ?`, bookId)?.n ?? 0;
+const isAdmin = (user) => user?.role === 'admin';
+// The author or the admin may delete the book and its chapters
+const canManage = (book, user) => user !== null && (user.id === book.user_id || isAdmin(user));
 
 // ------------------------------------------------------------------ browse and search
 
@@ -129,6 +139,7 @@ router.get('/books/:id', (req, res) => {
     const isAuthor = user !== null && user.id === book.user_id;
     const owned = user !== null && ownsBook(user.id, bookId);
     const isFree = Number(book.price) === 0;
+    const manage = canManage(book, user);
     res.json({
         book,
         tags: tags.map((t) => t.name),
@@ -137,6 +148,9 @@ router.get('/books/:id', (req, res) => {
         viewer: {
             loggedIn: user !== null,
             isAuthor,
+            isAdmin: isAdmin(user),
+            canManage: manage,
+            sales: manage ? salesOf(bookId) : 0,
             owned,
             isFree,
             fullAccess: isFree || isAuthor || owned,
@@ -162,6 +176,16 @@ router.post('/books/:id/reviews', requireLogin, (req, res) => {
          ON CONFLICT (book_id, user_id) DO UPDATE SET rating = excluded.rating, comment = excluded.comment, created_at = ${NOW}`,
         bookId, req.user.id, values.rating, values.comment);
     res.json({ message: 'Thanks, your review has been saved.' });
+});
+
+// Delete a review: the member who wrote it, or the admin
+router.delete('/books/:id/reviews/:userId', requireLogin, (req, res) => {
+    const bookId = int(req.params.id);
+    const reviewerId = int(req.params.userId);
+    if (reviewerId !== req.user.id && !isAdmin(req.user)) return fail(res, 403, 'You can only delete your own reviews.');
+    const result = run('DELETE FROM reviews WHERE book_id = ? AND user_id = ?', bookId, reviewerId);
+    if (result.changes === 0) return fail(res, 404, 'That review does not exist.');
+    res.json({ message: reviewerId === req.user.id ? 'Your review has been deleted.' : 'The review has been deleted.' });
 });
 
 // ------------------------------------------------------------------ reader
@@ -197,6 +221,7 @@ router.get('/books/:id/chapters/:number', (req, res) => {
         chapter: { ...chapter, content: canRead ? chapter.content : null },
         chapters,
         canRead,
+        isAuthor: req.user !== null && req.user.id === book.user_id,
         loggedIn: req.user !== null,
         inCart: req.user !== null && isInCart(req.user.id, bookId),
     });
@@ -248,7 +273,7 @@ function readCover(req, errors) {
 router.get('/my/books', requireLogin, (req, res) => {
     res.json(all(
         `SELECT b.id, b.serial_no, b.title, b.status, b.views, g.name AS genre,
-                COUNT(c.id) AS chapters, ${AVG_RATING} AS avg_rating
+                COUNT(c.id) AS chapters, ${AVG_RATING} AS avg_rating, ${SALES} AS sales
          FROM books b
          JOIN genres g ON g.id = b.genre_id
          LEFT JOIN chapters c ON c.book_id = b.id
@@ -295,6 +320,7 @@ router.get('/books/:id/edit', requireLogin, (req, res) => {
         cover: book.cover,
         tags: all('SELECT tag_id FROM book_tags WHERE book_id = ?', book.id).map((t) => t.tag_id),
         nextChapter: get('SELECT COALESCE(MAX(number), 0) + 1 AS n FROM chapters WHERE book_id = ?', book.id).n,
+        sales: salesOf(book.id),
     });
 });
 
@@ -331,6 +357,66 @@ router.post('/books/:id/chapters', requireLogin, (req, res) => {
         return next;
     });
     res.status(201).json({ number, message: `Chapter ${number} of "${book.title}" has been published.` });
+});
+
+// Current text of a chapter, for the Edit chapter form (author only)
+router.get('/books/:id/chapters/:number/edit', requireLogin, (req, res) => {
+    const book = ownBook(int(req.params.id), req.user.id);
+    if (!book) return fail(res, 403, 'You can only edit books that you have written.');
+    const chapter = get('SELECT number, title, content FROM chapters WHERE book_id = ? AND number = ?', book.id, int(req.params.number));
+    if (!chapter) return fail(res, 404, 'That chapter does not exist.');
+    res.json({ bookId: book.id, bookTitle: book.title, ...chapter });
+});
+
+// Edit a chapter (UPDATE). The release date is kept, so an edit doesn't count as a new update on Home.
+router.put('/books/:id/chapters/:number', requireLogin, (req, res) => {
+    const book = ownBook(int(req.params.id), req.user.id);
+    if (!book) return fail(res, 403, 'You can only edit books that you have written.');
+    const number = int(req.params.number);
+    if (!get('SELECT 1 FROM chapters WHERE book_id = ? AND number = ?', book.id, number)) return fail(res, 404, 'That chapter does not exist.');
+    const values = { title: str(req.body.title), content: str(req.body.content) };
+    const errors = validateChapter(values);
+    if (hasErrors(errors)) return fieldErrors(res, errors);
+
+    run('UPDATE chapters SET title = ?, content = ? WHERE book_id = ? AND number = ?', values.title, values.content, book.id, number);
+    res.json({ number, message: `Chapter ${number} of "${book.title}" has been updated.` });
+});
+
+// Delete a chapter (author or admin). Later chapters move up one number so Previous / Next still work.
+router.delete('/books/:id/chapters/:number', requireLogin, (req, res) => {
+    const book = get('SELECT id, title, user_id FROM books WHERE id = ?', int(req.params.id));
+    if (!book) return fail(res, 404, 'That book does not exist.');
+    if (!canManage(book, req.user)) return fail(res, 403, 'You can only delete chapters of books that you have written.');
+    const number = int(req.params.number);
+    const chapter = get('SELECT title FROM chapters WHERE book_id = ? AND number = ?', book.id, number);
+    if (!chapter) return fail(res, 404, 'That chapter does not exist.');
+
+    transaction(() => {
+        run('DELETE FROM chapters WHERE book_id = ? AND number = ?', book.id, number);
+        // SQLite checks UNIQUE (book_id, number) row by row, so go through negative numbers to close the gap
+        run('UPDATE chapters SET number = -(number - 1) WHERE book_id = ? AND number > ?', book.id, number);
+        run('UPDATE chapters SET number = -number WHERE book_id = ? AND number < 0', book.id);
+        // readers who got past the deleted chapter keep the same place in the story
+        run('UPDATE reading_list SET last_chapter = last_chapter - 1 WHERE book_id = ? AND last_chapter >= ?', book.id, number);
+        run('DELETE FROM reading_list WHERE book_id = ? AND in_library = 0 AND last_chapter = 0', book.id);
+    });
+    res.json({ message: `Chapter ${number} ("${chapter.title}") has been deleted. Later chapters were renumbered.` });
+});
+
+// Delete a book (author or admin, only while nobody has bought it).
+// Chapters, reviews, tags, views, reading lists and cart items go with it (ON DELETE CASCADE).
+router.delete('/books/:id', requireLogin, (req, res) => {
+    const book = get('SELECT id, title, user_id, cover FROM books WHERE id = ?', int(req.params.id));
+    if (!book) return fail(res, 404, 'That book does not exist.');
+    if (!canManage(book, req.user)) return fail(res, 403, 'You can only delete books that you have written.');
+    const sales = salesOf(book.id);
+    if (sales > 0) {
+        return fail(res, 409, `"${book.title}" has been bought ${sales} time${sales > 1 ? 's' : ''}, so it cannot be deleted. `
+            + 'You can still edit it or mark it as completed.');
+    }
+    run('DELETE FROM books WHERE id = ?', book.id);
+    deleteUpload(book.cover);  // only removes files in /uploads, never the seed covers
+    res.json({ message: `"${book.title}" has been deleted.`, wasAuthor: book.user_id === req.user.id });
 });
 
 export default router;

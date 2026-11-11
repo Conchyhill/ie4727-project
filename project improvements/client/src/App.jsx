@@ -15,7 +15,7 @@ const Login = lazy(() => import('./pages/Login.jsx'));
 const Account = lazy(() => import('./pages/Account.jsx'));
 const ReadingList = lazy(() => import('./pages/ReadingList.jsx'));
 const Create = lazy(() => import('./pages/Create.jsx'));
-const AddChapter = lazy(() => import('./pages/AddChapter.jsx'));
+const ChapterForm = lazy(() => import('./pages/ChapterForm.jsx'));
 const Cart = lazy(() => import('./pages/Cart.jsx'));
 const Info = lazy(() => import('./pages/Info.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
@@ -38,7 +38,8 @@ export default function App() {
                         <Route path="reading-list" element={members(<ReadingList />)} />
                         <Route path="create" element={members(<Create />)} />
                         <Route path="create/edit/:id" element={members(<Create />)} />
-                        <Route path="create/:id/chapter" element={members(<AddChapter />)} />
+                        <Route path="create/:id/chapter" element={members(<ChapterForm />)} />
+                        <Route path="create/:id/chapter/:ch" element={members(<ChapterForm />)} />
                         <Route path="cart" element={members(<Cart />)} />
                         <Route path="*" element={<NotFound />} />
                     </Route>

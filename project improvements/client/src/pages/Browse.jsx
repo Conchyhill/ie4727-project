@@ -181,7 +181,11 @@ export default function Browse() {
     const { data, error, loading, reload } = useApi(`/books?${params}`);
     const memberAction = useMemberAction();
 
-    useEffect(() => window.scrollTo({ top: 0, behavior: 'smooth' }), [params.get('page')]);
+    // Braces matter: scrollTo() returns a Promise in newer browsers, and React would
+    // treat a returned value as the clean-up function and crash on leaving the page
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [params.get('page')]);
 
     const addToLibrary = (book) => memberAction(() => api.post('/reading-list', { bookId: book.id }), reload);
 

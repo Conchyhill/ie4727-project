@@ -1,15 +1,42 @@
 // Create: publish a new book (/create) or edit one of your books (/create/edit/:id), plus the "My books" table.
+// Books nobody has bought yet can be deleted from the table or from under the edit form.
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { LANGUAGES, MAX_IMAGE_BYTES, MAX_TAGS, validateBook } from '@novel/shared';
 import { api } from '../lib/api.js';
-import { useApi, useForm, useTitle } from '../lib/hooks.js';
+import { useApi, useForm, useMemberAction, useTitle } from '../lib/hooks.js';
 import { coverUrl, formatViews, rating } from '../lib/format.js';
 import { useFlash } from '../context/FlashContext.jsx';
 import { CharCount, EmptyNote, ErrorPanel, Field, FormError, Spinner, StatusChip } from '../components/ui.jsx';
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const NEW_BOOK = { title: '', genreId: '', language: 'English', status: 'ongoing', price: '2.99', synopsis: '', tags: [], cover: null };
+
+// Ask, then delete the book; onDone runs after it is gone
+function useDeleteBook() {
+    const memberAction = useMemberAction();
+    return (book, onDone) => {
+        if (!window.confirm(`Delete "${book.title}" with all its chapters and reviews? This cannot be undone.`)) return;
+        memberAction(() => api.delete(`/books/${book.id}`), onDone);
+    };
+}
+
+function DeleteBookBox({ book }) {
+    const navigate = useNavigate();
+    const deleteBook = useDeleteBook();
+    return (
+        <div className="mt-6 rounded-2xl bg-red-50 p-5 text-sm text-red-900 ring-1 ring-red-200">
+            {book.sales === 0 ? (
+                <>
+                    <p className="mb-3">Deleting this book also removes its chapters, reviews and reading-list entries.</p>
+                    <button type="button" className="btn btn-danger" onClick={() => deleteBook(book, () => navigate('/create'))}>Delete book</button>
+                </>
+            ) : (
+                <p>This book has been bought {book.sales} time{book.sales > 1 ? 's' : ''}, so it cannot be deleted. You can still edit it or mark it as completed.</p>
+            )}
+        </div>
+    );
+}
 
 function BookForm({ initial, meta, editId }) {
     const flash = useFlash();
@@ -114,8 +141,10 @@ function BookForm({ initial, meta, editId }) {
     );
 }
 
-function MyBooks() {
-    const { data } = useApi('/my/books');
+function MyBooks({ editId }) {
+    const navigate = useNavigate();
+    const deleteBook = useDeleteBook();
+    const { data, reload } = useApi('/my/books');
     if (!data) return <Spinner />;
     if (data.length === 0) return <EmptyNote>You haven't published any books yet. Use the form above to create your first one.</EmptyNote>;
     return (
@@ -133,6 +162,10 @@ function MyBooks() {
                             <td className="space-x-3 whitespace-nowrap">
                                 <Link className="link" to={`/create/edit/${b.id}`}>Edit</Link>
                                 <Link className="link" to={`/create/${b.id}/chapter`}>+ Chapter</Link>
+                                {b.sales === 0 ? (
+                                    <button type="button" className="cursor-pointer text-sm font-medium text-red-700 hover:underline"
+                                        onClick={() => deleteBook(b, () => (b.id === editId ? navigate('/create') : reload()))}>Delete</button>
+                                ) : <span className="text-xs text-stone" title="Books that readers have bought cannot be deleted">Sold {b.sales}&times;</span>}
                             </td>
                         </tr>
                     ))}
@@ -161,10 +194,11 @@ export default function Create() {
                     <BookForm key={editId ?? 'new'} meta={meta} editId={editId}
                         initial={editId ? { ...book, genreId: String(book.genreId) } : NEW_BOOK} />
                 )}
+                {!error && editId && book && <DeleteBookBox book={book} />}
             </section>
             <section>
                 <h2 className="section-title">My books</h2>
-                <MyBooks />
+                <MyBooks key={editId ?? 'new'} editId={editId} />
             </section>
         </div>
     );

@@ -86,6 +86,9 @@ function chapter_nav($bookId, $number, $lastNumber, $allChapters, $position)
                     <span>Text size</span>
                     <button type="button" class="btn btnSecondary" data-font="-1" aria-label="Smaller text">A&minus;</button>
                     <button type="button" class="btn btnSecondary" data-font="1" aria-label="Larger text">A+</button>
+<?php if ($user && $user['id'] == $book['user_id']): ?>
+                    <a class="btn btnSecondary" href="create.php?edit_chapter=<?= $bookId ?>&amp;ch=<?= $number ?>">Edit chapter</a>
+<?php endif; ?>
                 </div>
                 <h1>Chapter <?= $number ?>: <?= h($chapter['title']) ?></h1>
                 <p class="chapterDate">Published <?= date('j M Y', strtotime($chapter['created_at'])) ?></p>

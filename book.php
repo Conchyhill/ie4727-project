@@ -26,6 +26,8 @@ if ($book === null) {
 }
 
 $isAuthor = $user && $user['id'] == $book['user_id'];
+$isAdmin = is_admin();
+$canManage = $isAuthor || $isAdmin;  // may delete chapters and the book (only the author may edit them)
 
 // ---- Review form (POST to this page) ----
 $reviewErrors = [];
@@ -86,6 +88,12 @@ if ($user) {
         $reviewComment = $myReview['comment'];
     }
 }
+// a book that readers have paid for can't be deleted (see delete_action.php)
+$sales = $canManage ? (int) db_row(
+    "SELECT COUNT(*) AS n FROM order_items oi JOIN orders o ON o.id = oi.order_id
+     WHERE oi.book_id = ? AND o.status = 'success'",
+    'i', [$bookId]
+)['n'] : 0;
 $isFree = (float) $book['price'] == 0;
 $fullAccess = $isFree || $isAuthor || $owned;
 $continueChapter = $listRow && $listRow['last_chapter'] > 0 ? (int) $listRow['last_chapter'] : 1;
@@ -159,6 +167,16 @@ require 'includes/header.php';
                             <button type="submit" class="btn btnSecondary">Buy full book &middot; <?= money($book['price']) ?></button>
                         </form>
 <?php endif; ?>
+
+<?php if ($canManage && $sales === 0): ?>
+                        <form action="delete_action.php" method="post">
+                            <input type="hidden" name="type" value="book">
+                            <input type="hidden" name="book_id" value="<?= $bookId ?>">
+                            <input type="hidden" name="back" value="<?= h($here) ?>">
+                            <button type="submit" class="btn btnDanger"
+                                    data-confirm="Delete &quot;<?= h($book['title']) ?>&quot; with all its chapters and reviews? This cannot be undone.">Delete book</button>
+                        </form>
+<?php endif; ?>
                     </div>
 <?php if (!$fullAccess): ?>
                     <p class="hint">The first <?= FREE_CHAPTERS ?> chapters are free. Buy the book to unlock the rest.</p>
@@ -180,14 +198,21 @@ require 'includes/header.php';
             </section>
 
             <!-- TABLE OF CONTENTS -->
-            <section>
+            <section id="chapters">
                 <h2>Table of Contents</h2>
+<?php if ($isAuthor): ?>
+                <p><a class="btn btnSecondary btnSmall" href="create.php?add_chapter=<?= $bookId ?>">+ Add chapter</a></p>
+<?php endif; ?>
 <?php if (!$chapters): ?>
                 <p class="emptyNote">No chapters have been published yet.</p>
 <?php else: ?>
                 <table class="dataTable chapterTable">
                     <thead>
-                        <tr><th scope="col">#</th><th scope="col">Chapter</th><th scope="col">Released</th><th scope="col">Access</th></tr>
+                        <tr><th scope="col">#</th><th scope="col">Chapter</th><th scope="col">Released</th><th scope="col">Access</th>
+<?php if ($canManage): ?>
+                            <th scope="col">Manage</th>
+<?php endif; ?>
+                        </tr>
                     </thead>
                     <tbody>
 <?php foreach ($chapters as $chapter): ?>
@@ -197,6 +222,20 @@ require 'includes/header.php';
                             <td><a href="read.php?book=<?= $bookId ?>&amp;ch=<?= $chapter['number'] ?>"><?= h($chapter['title']) ?></a></td>
                             <td><?= date('j M Y', strtotime($chapter['created_at'])) ?></td>
                             <td><?= $readable ? ($chapter['number'] <= FREE_CHAPTERS && !$fullAccess ? 'Free' : 'Unlocked') : '&#128274; Locked' ?></td>
+<?php if ($canManage): ?>
+                            <td class="actions">
+<?php if ($isAuthor): ?>
+                                <a href="create.php?edit_chapter=<?= $bookId ?>&amp;ch=<?= $chapter['number'] ?>">Edit</a>
+<?php endif; ?>
+                                <form action="delete_action.php" method="post" class="removeForm">
+                                    <input type="hidden" name="type" value="chapter">
+                                    <input type="hidden" name="book_id" value="<?= $bookId ?>">
+                                    <input type="hidden" name="number" value="<?= $chapter['number'] ?>">
+                                    <button type="submit" class="linkButton"
+                                            data-confirm="Delete Chapter <?= $chapter['number'] ?> (&quot;<?= h($chapter['title']) ?>&quot;)? Later chapters will be renumbered. This cannot be undone.">Delete</button>
+                                </form>
+                            </td>
+<?php endif; ?>
                         </tr>
 <?php endforeach; ?>
                     </tbody>
@@ -246,6 +285,16 @@ require 'includes/header.php';
                                 <span class="rating"><?= str_repeat('&#9733;', $review['rating']) . str_repeat('&#9734;', 5 - $review['rating']) ?></span>
                                 <small><?= date('j M Y', strtotime($review['created_at'])) ?></small></p>
                             <p><?= nl2br(h($review['comment'])) ?></p>
+<?php if ($user && ($review['user_id'] == $user['id'] || $isAdmin)): ?>
+                            <form action="delete_action.php" method="post" class="removeForm">
+                                <input type="hidden" name="type" value="review">
+                                <input type="hidden" name="book_id" value="<?= $bookId ?>">
+                                <input type="hidden" name="user_id" value="<?= $review['user_id'] ?>">
+                                <input type="hidden" name="back" value="<?= h($here . '#reviews') ?>">
+                                <button type="submit" class="linkButton"
+                                        data-confirm="<?= $review['user_id'] == $user['id'] ? 'Delete your review?' : 'Delete the review by ' . h($review['username']) . '?' ?>">Delete<?= $review['user_id'] == $user['id'] ? ' my review' : '' ?></button>
+                            </form>
+<?php endif; ?>
                         </div>
                     </li>
 <?php endforeach; ?>

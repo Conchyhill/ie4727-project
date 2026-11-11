@@ -71,7 +71,8 @@ project improvements/
 | `login.php`, `logout.php` | `/login` (`Login.jsx`) | `POST /api/auth/login`, `/signup`, `/logout`, `GET /api/auth/me` |
 | `account.php` | `/account` (`Account.jsx`) | `GET /api/account`, `POST /api/account/photo`, `PUT /api/account/profile`, `PUT /api/account/password`, `DELETE /api/account` |
 | `reading_list.php`, `list_action.php` | `/reading-list` (`ReadingList.jsx`) | `GET/POST /api/reading-list`, `DELETE /api/reading-list/:bookId?tab=` |
-| `create.php` | `/create`, `/create/edit/:id` (`Create.jsx`), `/create/:id/chapter` (`AddChapter.jsx`) | `GET /api/my/books`, `POST /api/books`, `GET /api/books/:id/edit`, `PUT /api/books/:id`, `POST /api/books/:id/chapters` |
+| `create.php` | `/create`, `/create/edit/:id` (`Create.jsx`), `/create/:id/chapter` and `/create/:id/chapter/:ch` (`ChapterForm.jsx`) | `GET /api/my/books`, `POST /api/books`, `GET /api/books/:id/edit`, `PUT /api/books/:id`, `POST /api/books/:id/chapters`, `GET /api/books/:id/chapters/:n/edit`, `PUT /api/books/:id/chapters/:n` |
+| `delete_action.php` | buttons on `Book.jsx`, `Create.jsx`, `ChapterForm.jsx` | `DELETE /api/books/:id` (author/admin, unsold only), `DELETE /api/books/:id/chapters/:n` (author/admin, renumbers later chapters), `DELETE /api/books/:id/reviews/:userId` (writer/admin) |
 | `cart.php`, `cart_action.php` | `/cart` (`Cart.jsx`) | `GET/POST /api/cart`, `DELETE /api/cart/:bookId`, `POST /api/cart/checkout`, `GET /api/orders/:id` |
 | `info.php` | `/info` (`Info.jsx`) | `GET /api/info/stats`, `POST /api/feedback` |
 

@@ -1,6 +1,7 @@
 // Book information: details, reading list / cart buttons, chapter table and reviews.
+// The author and the admin also get delete buttons (book, chapters, reviews); only the author can edit.
 import { useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { FREE_CHAPTERS, validateReview } from '@novel/shared';
 import { api } from '../lib/api.js';
 import { loginPath, useApi, useForm, useMemberAction, useTitle } from '../lib/hooks.js';
@@ -52,12 +53,17 @@ function ReviewForm({ bookId, myReview, onSaved }) {
 function BookActions({ data, reload }) {
     const { book, chapters, viewer } = data;
     const memberAction = useMemberAction();
+    const navigate = useNavigate();
     const listRow = viewer.listRow;
     const continueChapter = listRow?.last_chapter > 0 ? listRow.last_chapter : 1;
 
     const addToList = () => memberAction(() => api.post('/reading-list', { bookId: book.id }), reload);
     const removeFromList = () => memberAction(() => api.delete(`/reading-list/${book.id}?tab=library`), reload);
     const addToCart = () => memberAction(() => api.post('/cart', { bookId: book.id }), reload);
+    const deleteBook = () => {
+        if (!window.confirm(`Delete "${book.title}" with all its chapters and reviews? This cannot be undone.`)) return;
+        memberAction(() => api.delete(`/books/${book.id}`), (result) => navigate(result.wasAuthor ? '/create' : '/browse'));
+    };
 
     let buy;
     if (viewer.isAuthor) buy = <Link className="btn btn-secondary" to={`/create/edit/${book.id}`}>Edit book</Link>;
@@ -79,6 +85,8 @@ function BookActions({ data, reload }) {
                     : <button type="button" className="btn btn-secondary" onClick={addToList}>+ Add to reading list</button>}
                 {viewer.isAuthor && <Link className="btn btn-secondary" to={`/create/${book.id}/chapter`}>+ Add chapter</Link>}
                 {buy}
+                {/* a book that readers have paid for can't be deleted */}
+                {viewer.canManage && viewer.sales === 0 && <button type="button" className="btn btn-danger" onClick={deleteBook}>Delete book</button>}
             </div>
             {!viewer.fullAccess && <p className="mt-3 text-sm text-stone">The first {FREE_CHAPTERS} chapters are free. Buy the book to unlock the rest.</p>}
         </>
@@ -88,12 +96,23 @@ function BookActions({ data, reload }) {
 export default function Book() {
     const { id } = useParams();
     const location = useLocation();
+    const memberAction = useMemberAction();
     const { data, error, reload } = useApi(`/books/${id}`);
     useTitle(data?.book.title ?? (error ? 'Book not found' : 'Book'));
 
     if (error) return <ErrorPanel error={error} />;
     if (!data) return <Spinner />;
     const { book, tags, chapters, reviews, viewer } = data;
+    const myId = viewer.myReview?.user_id;
+
+    const deleteChapter = (c) => {
+        if (!window.confirm(`Delete Chapter ${c.number} ("${c.title}")? Later chapters will be renumbered. This cannot be undone.`)) return;
+        memberAction(() => api.delete(`/books/${book.id}/chapters/${c.number}`), reload);
+    };
+    const deleteReview = (r) => {
+        if (!window.confirm(r.user_id === myId ? 'Delete your review?' : `Delete the review by ${r.username}?`)) return;
+        memberAction(() => api.delete(`/books/${book.id}/reviews/${r.user_id}`), reload);
+    };
 
     const stats = [
         ['Rating', <><Stars value={book.avg_rating} /> <small className="text-stone">({book.review_count})</small></>],
@@ -133,12 +152,17 @@ export default function Book() {
             </section>
 
             {/* TABLE OF CONTENTS */}
-            <section>
+            <section id="chapters">
                 <h2 className="section-title">Table of Contents</h2>
                 {chapters.length === 0 ? <EmptyNote>No chapters have been published yet.</EmptyNote> : (
                     <div className="card overflow-x-auto p-0 sm:p-0">
                         <table className="data-table">
-                            <thead><tr><th scope="col">#</th><th scope="col">Chapter</th><th scope="col">Released</th><th scope="col">Access</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th><th scope="col">Chapter</th><th scope="col">Released</th><th scope="col">Access</th>
+                                    {viewer.canManage && <th scope="col">Manage</th>}
+                                </tr>
+                            </thead>
                             <tbody>
                                 {chapters.map((c) => {
                                     const free = c.number <= FREE_CHAPTERS;
@@ -150,6 +174,13 @@ export default function Book() {
                                             <td><Link className="link" to={`/books/${book.id}/read/${c.number}`}>{c.title}</Link>{read && <span className="ml-2 text-xs">✓ read</span>}</td>
                                             <td className="whitespace-nowrap">{formatDate(c.created_at)}</td>
                                             <td className="whitespace-nowrap">{readable ? (free && !viewer.fullAccess ? 'Free' : 'Unlocked') : '🔒 Locked'}</td>
+                                            {viewer.canManage && (
+                                                <td className="space-x-3 whitespace-nowrap">
+                                                    {viewer.isAuthor && <Link className="link" to={`/create/${book.id}/chapter/${c.number}`}>Edit</Link>}
+                                                    <button type="button" className="cursor-pointer text-sm font-medium text-red-700 hover:underline"
+                                                        onClick={() => deleteChapter(c)}>Delete</button>
+                                                </td>
+                                            )}
                                         </tr>
                                     );
                                 })}
@@ -179,6 +210,11 @@ export default function Book() {
                                     <small className="text-stone">{formatDate(r.created_at)}</small>
                                 </p>
                                 <p className="mt-1 text-sm whitespace-pre-line">{r.comment}</p>
+                                {(r.user_id === myId || viewer.isAdmin) && (
+                                    <button type="button" className="mt-1 cursor-pointer text-xs font-medium text-red-700 hover:underline" onClick={() => deleteReview(r)}>
+                                        {r.user_id === myId ? 'Delete my review' : 'Delete'}
+                                    </button>
+                                )}
                             </div>
                         </li>
                     ))}

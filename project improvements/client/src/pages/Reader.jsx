@@ -111,6 +111,7 @@ export default function Reader() {
                     <span>Text size</span>
                     <button type="button" className="btn btn-secondary btn-sm" onClick={() => step(-1)} aria-label="Smaller text" disabled={size === SIZES[0]}>A&minus;</button>
                     <button type="button" className="btn btn-secondary btn-sm" onClick={() => step(1)} aria-label="Larger text" disabled={size === SIZES[SIZES.length - 1]}>A+</button>
+                    {data.isAuthor && <Link className="btn btn-secondary btn-sm" to={`/create/${book.id}/chapter/${chapter.number}`}>Edit chapter</Link>}
                 </div>
                 <h1 className="font-serif text-2xl font-bold sm:text-3xl">Chapter {chapter.number}: {chapter.title}</h1>
                 <p className="mt-1 mb-8 text-sm text-stone">Published {formatDate(chapter.created_at)}</p>

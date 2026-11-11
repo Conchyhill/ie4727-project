@@ -1,8 +1,10 @@
 <?php
-// Create: publish a new book, edit one of your books, or add a chapter to it.
-//   create.php                 -> new book form + "My books" table
-//   create.php?edit=ID         -> edit that book (UPDATE)
-//   create.php?add_chapter=ID  -> add the next chapter (INSERT)
+// Create: publish a new book, edit one of your books, or add / edit a chapter.
+//   create.php                        -> new book form + "My books" table
+//   create.php?edit=ID                -> edit that book (UPDATE)
+//   create.php?add_chapter=ID         -> add the next chapter (INSERT)
+//   create.php?edit_chapter=ID&ch=N   -> edit chapter N of that book (UPDATE)
+// Deleting books and chapters is done by delete_action.php.
 require 'includes/init.php';
 require_login();
 
@@ -11,7 +13,8 @@ const MAX_TAGS = 5;
 
 $userId = current_user()['id'];
 $editId = (int) param($_GET, 'edit');
-$chapterBookId = (int) param($_GET, 'add_chapter');
+$editChapterNo = (int) param($_GET, 'ch');
+$chapterBookId = (int) param($_GET, 'add_chapter') ?: (int) param($_GET, 'edit_chapter');
 $errors = [];
 
 // A book the current member wrote, or null
@@ -27,6 +30,17 @@ if (($editId && !$editBook) || ($chapterBookId && !$chapterBook)) {
     header('Location: create.php');
     exit;
 }
+// The chapter being edited (null when adding a new one)
+$editChapter = null;
+if ($chapterBook && param($_GET, 'edit_chapter') !== '') {
+    $editChapter = db_row('SELECT number, title, content FROM chapters WHERE book_id = ? AND number = ?', 'ii',
+        [$chapterBookId, $editChapterNo]);
+    if ($editChapter === null) {
+        flash('That chapter does not exist.', 'error');
+        header('Location: book.php?id=' . $chapterBookId . '#chapters');
+        exit;
+    }
+}
 $mode = $chapterBook ? 'chapter' : ($editBook ? 'edit' : 'new');
 
 $genres = db_all('SELECT id, name FROM genres ORDER BY name');
@@ -38,8 +52,8 @@ if ($editBook) {
     $values = array_merge($values, array_intersect_key($editBook, $values));
     $values['tags'] = array_column(db_all('SELECT tag_id FROM book_tags WHERE book_id = ?', 'i', [$editId]), 'tag_id');
 }
-$chapterTitle = '';
-$chapterContent = '';
+$chapterTitle = $editChapter ? $editChapter['title'] : '';
+$chapterContent = $editChapter ? $editChapter['content'] : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($mode === 'new' || $mode === 'edit')) {
     // ---- NEW BOOK / EDIT BOOK ----
@@ -127,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($mode === 'new' || $mode === 'edit
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $mode === 'chapter') {
-    // ---- ADD CHAPTER ----
+    // ---- ADD / EDIT CHAPTER ----
     $chapterTitle = param($_POST, 'chapter_title');
     $chapterContent = param($_POST, 'content');
     if (mb_strlen($chapterTitle) < 1 || mb_strlen($chapterTitle) > 150) {
@@ -136,7 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($mode === 'new' || $mode === 'edit
     if (mb_strlen($chapterContent) < 100) {
         $errors[] = 'The chapter text must be at least 100 characters.';
     }
-    if (!$errors) {
+    if (!$errors && $editChapter) {
+        // the release date (created_at) is kept, so an edit doesn't count as a new update on the home page
+        db_query('UPDATE chapters SET title = ?, content = ? WHERE book_id = ? AND number = ?', 'ssii',
+            [$chapterTitle, $chapterContent, $chapterBookId, $editChapter['number']]);
+        flash('Chapter ' . $editChapter['number'] . ' of "' . $chapterBook['title'] . '" has been updated.');
+        header('Location: read.php?book=' . $chapterBookId . '&ch=' . $editChapter['number']);
+        exit;
+    } elseif (!$errors) {
         $next = (int) db_row('SELECT COALESCE(MAX(number), 0) + 1 AS n FROM chapters WHERE book_id = ?', 'i', [$chapterBookId])['n'];
         db_query('INSERT INTO chapters (book_id, number, title, content) VALUES (?, ?, ?, ?)', 'iiss',
             [$chapterBookId, $next, $chapterTitle, $chapterContent]);
@@ -149,7 +170,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($mode === 'new' || $mode === 'edit
 $myBooks = db_all(
     'SELECT b.id, b.serial_no, b.title, b.status, b.views, g.name AS genre,
             COUNT(c.id) AS chapters,
-            (SELECT AVG(r.rating) FROM reviews r WHERE r.book_id = b.id) AS avg_rating
+            (SELECT AVG(r.rating) FROM reviews r WHERE r.book_id = b.id) AS avg_rating,
+            (SELECT COUNT(*) FROM order_items oi JOIN orders o ON o.id = oi.order_id
+              WHERE oi.book_id = b.id AND o.status = \'success\') AS sales
      FROM books b
      JOIN genres g ON g.id = b.genre_id
      LEFT JOIN chapters c ON c.book_id = b.id
@@ -159,16 +182,24 @@ $myBooks = db_all(
     'i', [$userId]
 );
 
-$pageTitle = $mode === 'chapter' ? 'Add chapter' : ($mode === 'edit' ? 'Edit book' : 'Create');
+$pageTitle = $mode === 'chapter' ? ($editChapter ? 'Edit chapter' : 'Add chapter') : ($mode === 'edit' ? 'Edit book' : 'Create');
 $pageScripts = ['forms.js'];
 require 'includes/header.php';
 ?>
 <?php if ($mode === 'chapter'): ?>
-<?php $nextNumber = (int) db_row('SELECT COALESCE(MAX(number), 0) + 1 AS n FROM chapters WHERE book_id = ?', 'i', [$chapterBookId])['n']; ?>
-            <!-- ADD CHAPTER -->
+<?php
+    if ($editChapter) {
+        $chapterNumber = (int) $editChapter['number'];
+        $chapterAction = 'create.php?edit_chapter=' . $chapterBookId . '&ch=' . $chapterNumber;
+    } else {
+        $chapterNumber = (int) db_row('SELECT COALESCE(MAX(number), 0) + 1 AS n FROM chapters WHERE book_id = ?', 'i', [$chapterBookId])['n'];
+        $chapterAction = 'create.php?add_chapter=' . $chapterBookId;
+    }
+?>
+            <!-- ADD / EDIT CHAPTER -->
             <section>
-                <h2>Add Chapter <?= $nextNumber ?> to &ldquo;<?= h($chapterBook['title']) ?>&rdquo;</h2>
-                <form action="create.php?add_chapter=<?= $chapterBookId ?>" method="post" class="stackForm wideForm" id="chapterForm" novalidate>
+                <h2><?= $editChapter ? 'Edit' : 'Add' ?> Chapter <?= $chapterNumber ?> <?= $editChapter ? 'of' : 'to' ?> &ldquo;<?= h($chapterBook['title']) ?>&rdquo;</h2>
+                <form action="<?= h($chapterAction) ?>" method="post" class="stackForm wideForm" id="chapterForm" novalidate>
 <?php foreach ($errors as $error): ?>
                     <p class="flash flash-error"><?= h($error) ?></p>
 <?php endforeach; ?>
@@ -180,10 +211,20 @@ require 'includes/header.php';
                     <span class="charCount" data-for="content"></span>
                     <p class="fieldError"></p>
                     <div class="formActions">
-                        <button type="submit" class="btn">Publish chapter</button>
-                        <a class="btn btnSecondary" href="book.php?id=<?= $chapterBookId ?>">Cancel</a>
+                        <button type="submit" class="btn"><?= $editChapter ? 'Save changes' : 'Publish chapter' ?></button>
+                        <a class="btn btnSecondary" href="book.php?id=<?= $chapterBookId ?>#chapters">Cancel</a>
                     </div>
                 </form>
+<?php if ($editChapter): ?>
+                <form action="delete_action.php" method="post" class="dangerZone">
+                    <input type="hidden" name="type" value="chapter">
+                    <input type="hidden" name="book_id" value="<?= $chapterBookId ?>">
+                    <input type="hidden" name="number" value="<?= $chapterNumber ?>">
+                    <p>Deleting this chapter moves every later chapter up by one number.</p>
+                    <button type="submit" class="btn btnDanger"
+                            data-confirm="Delete Chapter <?= $chapterNumber ?>? Later chapters will be renumbered. This cannot be undone.">Delete chapter</button>
+                </form>
+<?php endif; ?>
             </section>
 <?php else: ?>
             <!-- NEW / EDIT BOOK -->
@@ -263,6 +304,21 @@ require 'includes/header.php';
 <?php endif; ?>
                     </div>
                 </form>
+<?php if ($mode === 'edit'): ?>
+<?php $editSales = array_column($myBooks, 'sales', 'id')[$editId]; ?>
+<?php if ($editSales == 0): ?>
+                <form action="delete_action.php" method="post" class="dangerZone">
+                    <input type="hidden" name="type" value="book">
+                    <input type="hidden" name="book_id" value="<?= $editId ?>">
+                    <p>Deleting this book also removes its chapters, reviews and reading-list entries.</p>
+                    <button type="submit" class="btn btnDanger"
+                            data-confirm="Delete &quot;<?= h($editBook['title']) ?>&quot; with all its chapters and reviews? This cannot be undone.">Delete book</button>
+                </form>
+<?php else: ?>
+                <p class="dangerZone">This book has been bought <?= $editSales ?> time<?= $editSales > 1 ? 's' : '' ?>, so it cannot be deleted.
+                    You can still edit it or mark it as completed.</p>
+<?php endif; ?>
+<?php endif; ?>
             </section>
 <?php endif; ?>
 
@@ -290,6 +346,17 @@ require 'includes/header.php';
                             <td class="actions">
                                 <a href="create.php?edit=<?= $book['id'] ?>">Edit</a>
                                 <a href="create.php?add_chapter=<?= $book['id'] ?>">+ Chapter</a>
+<?php if ($book['sales'] == 0): ?>
+                                <form action="delete_action.php" method="post" class="removeForm">
+                                    <input type="hidden" name="type" value="book">
+                                    <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                                    <input type="hidden" name="back" value="create.php">
+                                    <button type="submit" class="linkButton"
+                                            data-confirm="Delete &quot;<?= h($book['title']) ?>&quot; with all its chapters and reviews? This cannot be undone.">Delete</button>
+                                </form>
+<?php else: ?>
+                                <span class="hint" title="Books that readers have bought cannot be deleted">Sold <?= $book['sales'] ?>&times;</span>
+<?php endif; ?>
                             </td>
                         </tr>
 <?php endforeach; ?>
