@@ -1,0 +1,25 @@
+{
+  "name": "novel-portal-modern",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Modern version of the IE4727 web-novel library: React + Tailwind CSS client, Node.js + Express API, SQLite database",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "start": "npm start -w server",
+    "db:reset": "npm run db:reset -w server",
+    "convert-seed": "npm run convert-seed -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

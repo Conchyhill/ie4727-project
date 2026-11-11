@@ -18,6 +18,7 @@ function nav_class($page)
         <meta charset="UTF-8">
         <title><?= h($pageTitle) ?> | <?= h(SITE_NAME) ?></title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="images/logo.png">
         <link rel="stylesheet" href="css/style.css">
 <?php foreach ($pageScripts as $script): ?>
         <script src="js/<?= h($script) ?>" defer></script>
@@ -29,7 +30,7 @@ function nav_class($page)
         <div id="navBar">
             <div class="navBarInner">
                 <ul class="navBarLeft">
-                    <li><a href="index.php"><img src="images/logo_placeholder.jpg" alt="Home" width="50" height="50"></a></li>
+                    <li><a href="index.php"><img src="images/logo.png" alt="Home" width="50" height="50"></a></li>
                     <li><a href="browse.php"<?= nav_class('browse.php') ?>>Browse</a></li>
                     <li><a href="create.php"<?= nav_class('create.php') ?>>Create</a></li>
                 </ul>

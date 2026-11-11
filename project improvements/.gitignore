@@ -1,0 +1,13 @@
+node_modules/
+client/dist/
+
+# SQLite database (created on first run / npm run db:reset)
+server/data/*
+!server/data/.gitkeep
+
+# Files uploaded through the site (covers, profile photos)
+server/uploads/*/*
+!server/uploads/*/.gitkeep
+
+.env
+*.log

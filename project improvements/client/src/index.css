@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* Palette from archives/template (same colours as css/style.css in the PHP version) */
+@theme {
+    --color-ink: #302a1c;
+    --color-stone: #6d6758;
+    --color-sand: #b69f86;
+    --color-khaki: #bab19b;
+    --color-cream: #f3ebe3;
+    --color-blush: #d8bfae;
+    --font-serif: Georgia, Cambria, "Times New Roman", serif;
+}
+
+@layer base {
+    body {
+        @apply min-h-screen text-ink antialiased;
+        /* beige gradient from the wireframe deck */
+        background: linear-gradient(var(--color-cream), var(--color-blush)) fixed;
+    }
+    ::selection {
+        @apply bg-sand/40;
+    }
+}
+
+/* Reusable pieces, so the JSX stays readable */
+@layer components {
+    .btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full bg-stone px-5 py-2 text-sm font-semibold
+            whitespace-nowrap text-white shadow-sm transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2
+            focus-visible:outline-sand disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-secondary {
+        @apply bg-white text-stone ring-1 ring-sand hover:bg-cream;
+    }
+    .btn-done {
+        @apply bg-khaki/40 text-ink shadow-none ring-1 ring-khaki hover:bg-khaki/60;
+    }
+    .btn-danger {
+        @apply bg-red-700 hover:bg-red-800;
+    }
+    .btn-sm {
+        @apply px-3 py-1 text-xs;
+    }
+    .card {
+        @apply rounded-2xl bg-white/85 p-5 shadow-sm ring-1 ring-black/5 sm:p-6;
+    }
+    .input {
+        @apply block w-full rounded-lg border border-khaki bg-white px-3 py-2 text-sm text-ink shadow-xs transition
+            placeholder:text-stone/50 focus:border-stone focus:ring-2 focus:ring-sand/40 focus:outline-none;
+    }
+    .input[aria-invalid="true"] {
+        @apply border-red-600 focus:ring-red-200;
+    }
+    .label {
+        @apply mb-1 block text-sm font-medium text-ink;
+    }
+    .link {
+        @apply font-medium text-stone underline-offset-2 hover:text-ink hover:underline;
+    }
+    .chip {
+        @apply inline-flex items-center rounded-full bg-cream px-2.5 py-0.5 text-xs font-medium text-stone ring-1 ring-khaki/60;
+    }
+    .data-table {
+        @apply w-full text-left text-sm;
+    }
+    .data-table th {
+        @apply bg-cream/80 px-3 py-2 font-semibold text-stone;
+    }
+    .data-table td {
+        @apply border-t border-khaki/40 px-3 py-2 align-middle;
+    }
+    .data-table tbody tr {
+        @apply transition-colors hover:bg-cream/50;
+    }
+    .section-title {
+        @apply mb-4 text-xl font-bold tracking-tight text-ink sm:text-2xl;
+    }
+}
+
+/* Chapter text uses a book-like serif and keeps lines a comfortable length */
+.chapter-text p {
+    margin-bottom: 1.1em;
+    line-height: 1.8;
+}

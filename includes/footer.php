@@ -10,7 +10,7 @@
                 <li><a href="info.php#contact">Contact</a></li>
             </ul>
             <div class="footerCopyright">
-                <img src="images/logo_placeholder.jpg" alt="logo" height="50" width="50">
+                <img src="images/logo.png" alt="logo" height="50" width="50">
                 <br>
                 <small><i>&copy; <?= date('Y') ?> <?= h(SITE_NAME) ?> &middot; IE4727 project</i></small>
             </div>

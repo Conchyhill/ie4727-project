@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+<!-- Second Chance Empress (NB-000015): generated cover art, 3:4 -->
+<defs><radialGradient id="bg" cx="0.5" cy="0.4" r="0.8"><stop offset="0" stop-color="#9a2234" stop-opacity="1"/><stop offset="1" stop-color="#2a050c" stop-opacity="1"/></radialGradient><linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a050c" stop-opacity="0"/><stop offset="0.22" stop-color="#2a050c" stop-opacity="0.88"/><stop offset="1" stop-color="#2a050c" stop-opacity="0.96"/></linearGradient></defs>
+<rect width="300" height="400" fill="url(#bg)"/>
+<circle cx="150" cy="170" r="98" fill="none" stroke="#e8c06a" stroke-width="2" opacity="0.6"/>
+<circle cx="150" cy="170" r="90" fill="none" stroke="#e8c06a" stroke-width="1" stroke-dasharray="2 5" opacity="0.6"/>
+<ellipse cx="0" cy="272.5" rx="5" ry="3" fill="#e0445a" opacity="0.7"/><ellipse cx="263.9" cy="277.6" rx="5" ry="3" fill="#e0445a" opacity="0.6"/><ellipse cx="211.7" cy="51.2" rx="5" ry="3" fill="#e0445a" opacity="0.6"/><ellipse cx="6.1" cy="210.7" rx="5" ry="3" fill="#e0445a" opacity="0.9"/><ellipse cx="139.3" cy="145.2" rx="5" ry="3" fill="#e0445a" opacity="0.9"/><ellipse cx="283.7" cy="18.8" rx="5" ry="3" fill="#e0445a" opacity="0.6"/><ellipse cx="225.4" cy="0.7" rx="5" ry="3" fill="#e0445a" opacity="0.6"/><ellipse cx="90.5" cy="233.7" rx="5" ry="3" fill="#e0445a" opacity="1"/><ellipse cx="207.8" cy="253.1" rx="5" ry="3" fill="#e0445a" opacity="0.7"/><ellipse cx="242.6" cy="67.2" rx="5" ry="3" fill="#e0445a" opacity="0.8"/><ellipse cx="196.4" cy="121.2" rx="5" ry="3" fill="#e0445a" opacity="1"/><ellipse cx="213.6" cy="11.5" rx="5" ry="3" fill="#e0445a" opacity="1"/><ellipse cx="146.9" cy="96.9" rx="5" ry="3" fill="#e0445a" opacity="0.9"/><ellipse cx="144" cy="197.6" rx="5" ry="3" fill="#e0445a" opacity="0.9"/><ellipse cx="252" cy="84.1" rx="5" ry="3" fill="#e0445a" opacity="0.9"/><ellipse cx="27.1" cy="132.9" rx="5" ry="3" fill="#e0445a" opacity="0.6"/><ellipse cx="27.2" cy="152.9" rx="5" ry="3" fill="#e0445a" opacity="0.7"/><ellipse cx="49.8" cy="158.7" rx="5" ry="3" fill="#e0445a" opacity="0.6"/>
+<path d="M126 92 L126 70 L138 82 L150 62 L162 82 L174 70 L174 92Z" fill="#e8c06a" stroke="#7a5214" stroke-width="2"/>
+<rect x="110" y="104" width="80" height="10" rx="3" fill="#e8c06a"/><rect x="110" y="240" width="80" height="10" rx="3" fill="#e8c06a"/>
+<path d="M120 114 L180 114 C180 154 156 162 156 177 C156 192 180 200 180 240 L120 240 C120 200 144 192 144 177 C144 162 120 154 120 114Z" fill="#f5e6c8" fill-opacity="0.25" stroke="#e8c06a" stroke-width="3"/>
+<path d="M126 232 L174 232 C172 210 158 196 150 188 C142 196 128 210 126 232Z" fill="#e8c06a" opacity="0.35"/>
+<path d="M130 126 L170 126 C168 146 156 160 150 168 C144 160 132 146 130 126Z" fill="#e8c06a"/>
+<line x1="150" y1="168" x2="150" y2="200" stroke="#e8c06a" stroke-width="2" stroke-dasharray="3 3"/>
+<path d="M150 214 L145 222 L155 222Z" fill="#e8c06a"/>
+<rect x="112" y="114" width="6" height="126" fill="#b8892e"/><rect x="182" y="114" width="6" height="126" fill="#b8892e"/>
+<rect x="0" y="253" width="300" height="147" fill="url(#band)"/>
+<line x1="70" y1="287" x2="240" y2="287" stroke="#e8c06a" stroke-width="1.5" opacity="0.8"/>
+<g font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="bold" fill="#fffaf0" text-anchor="middle"><text x="155" y="325">Second Chance</text><text x="155" y="359.5">Empress</text></g>
+<text x="155" y="382" font-family="Georgia, 'Times New Roman', serif" font-size="13" font-style="italic" fill="#e8c06a" text-anchor="middle" letter-spacing="1">chen</text>
+<rect x="0" y="0" width="10" height="400" fill="#000" opacity="0.28"/><rect x="10" y="0" width="1.5" height="400" fill="#fff" opacity="0.18"/>
+</svg>

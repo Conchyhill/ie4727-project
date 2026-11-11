@@ -1,0 +1,23 @@
+{
+  "name": "@novel/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node.js + Express JSON API for the web-novel library, backed by SQLite",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch-path=src --watch-path=../shared src/index.js",
+    "start": "node src/index.js",
+    "db:reset": "node scripts/reset-db.js",
+    "convert-seed": "node scripts/convert-seed.js"
+  },
+  "dependencies": {
+    "@novel/shared": "*",
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.2.0",
+    "cookie-parser": "^1.4.7",
+    "cookie-session": "^2.1.0",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}

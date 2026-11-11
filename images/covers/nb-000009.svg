@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+<!-- The Sword Saint Who Refused to Retire (NB-000009): generated cover art, 3:4 -->
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4e7c6" stop-opacity="1"/><stop offset="1" stop-color="#d9b37a" stop-opacity="1"/></linearGradient><linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2420" stop-opacity="0"/><stop offset="0.22" stop-color="#2b2420" stop-opacity="0.88"/><stop offset="1" stop-color="#2b2420" stop-opacity="0.96"/></linearGradient></defs>
+<rect width="300" height="400" fill="url(#bg)"/>
+<circle cx="190" cy="112" r="64" fill="#c8442e"/>
+<path d="M0 230 L50 170 L85 205 L140 140 L200 215 L240 180 L300 225 L300 400 L0 400Z" fill="#7d6a52" opacity="0.55"/>
+<path d="M0 262 L40 228 L100 255 L160 205 L230 252 L270 236 L300 250 L300 400 L0 400Z" fill="#3b3328" opacity="0.85"/>
+<g transform="rotate(28 150 160)">
+<path d="M146 22 L154 32 L154 232 L146 232Z" fill="#e3e8eb" stroke="#5c6870" stroke-width="1.5"/>
+<line x1="149" y1="34" x2="149" y2="230" stroke="#a9b6bd" stroke-width="1"/>
+<ellipse cx="150" cy="234" rx="17" ry="5" fill="#2b2420"/>
+<rect x="145" y="238" width="10" height="58" rx="2" fill="#2b2420"/>
+<g fill="#c9a45a"><path d="M145 246 L150 251 L155 246 L150 241Z"/><path d="M145 258 L150 263 L155 258 L150 253Z"/><path d="M145 270 L150 275 L155 270 L150 265Z"/><path d="M145 282 L150 287 L155 282 L150 277Z"/></g>
+</g>
+<ellipse cx="0" cy="47.8" rx="4" ry="2.4" fill="#e79aa8" opacity="0.9"  /><ellipse cx="238.5" cy="252.4" rx="4" ry="2.4" fill="#e79aa8" opacity="0.8"  /><ellipse cx="34.1" cy="107.2" rx="4" ry="2.4" fill="#e79aa8" opacity="0.8"  /><ellipse cx="143.6" cy="80.9" rx="4" ry="2.4" fill="#e79aa8" opacity="0.8"  /><ellipse cx="12.1" cy="18" rx="4" ry="2.4" fill="#e79aa8" opacity="0.8"  /><ellipse cx="227.2" cy="47" rx="4" ry="2.4" fill="#e79aa8" opacity="0.7"  /><ellipse cx="184.7" cy="193" rx="4" ry="2.4" fill="#e79aa8" opacity="0.9"  /><ellipse cx="223.2" cy="80.8" rx="4" ry="2.4" fill="#e79aa8" opacity="0.7"  /><ellipse cx="108.6" cy="111.1" rx="4" ry="2.4" fill="#e79aa8" opacity="0.8"  /><ellipse cx="208.1" cy="210" rx="4" ry="2.4" fill="#e79aa8" opacity="1"  /><ellipse cx="67" cy="219.2" rx="4" ry="2.4" fill="#e79aa8" opacity="0.8"  /><ellipse cx="259.1" cy="170.1" rx="4" ry="2.4" fill="#e79aa8" opacity="0.9"  /><ellipse cx="136.3" cy="241.2" rx="4" ry="2.4" fill="#e79aa8" opacity="1"  /><ellipse cx="42" cy="123.3" rx="4" ry="2.4" fill="#e79aa8" opacity="0.7"  /><ellipse cx="113.6" cy="20.5" rx="4" ry="2.4" fill="#e79aa8" opacity="0.7"  /><ellipse cx="42.6" cy="140.6" rx="4" ry="2.4" fill="#e79aa8" opacity="0.9"  />
+<rect x="0" y="242.7" width="300" height="157.4" fill="url(#band)"/>
+<line x1="70" y1="276.7" x2="240" y2="276.7" stroke="#e9c98a" stroke-width="1.5" opacity="0.8"/>
+<g font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="bold" fill="#fffaf0" text-anchor="middle"><text x="155" y="309">The Sword Saint</text><text x="155" y="335.5">Who Refused</text><text x="155" y="361.9">to Retire</text></g>
+<text x="155" y="382" font-family="Georgia, 'Times New Roman', serif" font-size="13" font-style="italic" fill="#e9c98a" text-anchor="middle" letter-spacing="1">inkwell</text>
+<rect x="0" y="0" width="10" height="400" fill="#000" opacity="0.28"/><rect x="10" y="0" width="1.5" height="400" fill="#fff" opacity="0.18"/>
+</svg>

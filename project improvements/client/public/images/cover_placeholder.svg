@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+  <!-- Placeholder book cover (3:4). Replace with real cover images later. -->
+  <rect width="300" height="400" fill="#bab19b"/>
+  <rect x="18" y="18" width="264" height="364" fill="none" stroke="#6d6758" stroke-width="4"/>
+  <rect x="0" y="0" width="14" height="400" fill="#6d6758"/>
+  <text x="157" y="190" font-family="Georgia, serif" font-size="30" fill="#302a1c" text-anchor="middle">Book</text>
+  <text x="157" y="230" font-family="Georgia, serif" font-size="30" fill="#302a1c" text-anchor="middle">Cover</text>
+</svg>

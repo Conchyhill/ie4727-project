@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+<!-- Dungeon Diner (NB-000011): generated cover art, 3:4 -->
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4852" stop-opacity="1"/><stop offset="1" stop-color="#2c2a31" stop-opacity="1"/></linearGradient><radialGradient id="torch" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffb347" stop-opacity="0.6"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient><pattern id="brick" width="40" height="20" patternUnits="userSpaceOnUse"><rect width="40" height="20" fill="none" stroke="#24222a" stroke-width="2"/><line x1="20" y1="10" x2="20" y2="20" stroke="#24222a" stroke-width="2"/><line x1="0" y1="10" x2="40" y2="10" stroke="#24222a" stroke-width="2"/></pattern><linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f1d24" stop-opacity="0"/><stop offset="0.22" stop-color="#1f1d24" stop-opacity="0.88"/><stop offset="1" stop-color="#1f1d24" stop-opacity="0.96"/></linearGradient></defs>
+<rect width="300" height="400" fill="url(#bg)"/><rect width="300" height="300" fill="url(#brick)" opacity="0.8"/>
+<path d="M95 300 L95 120 A55 55 0 0 1 205 120 L205 300Z" fill="#131217"/>
+<circle cx="40" cy="110" r="45" fill="url(#torch)"/><circle cx="260" cy="110" r="45" fill="url(#torch)"/>
+<rect x="36" y="110" width="8" height="26" fill="#5a3a22"/><path d="M40 112 C30 100 38 92 40 84 C44 94 52 100 40 112Z" fill="#ff8a2a"/>
+<rect x="256" y="110" width="8" height="26" fill="#5a3a22"/><path d="M260 112 C250 100 258 92 260 84 C264 94 272 100 260 112Z" fill="#ff8a2a"/>
+<rect x="20" y="246" width="260" height="14" rx="3" fill="#7a4e2c"/><rect x="34" y="260" width="10" height="40" fill="#5a3820"/><rect x="256" y="260" width="10" height="40" fill="#5a3820"/>
+<ellipse cx="115" cy="240" rx="52" ry="12" fill="#f2efe6" stroke="#b7b2a6" stroke-width="2"/>
+<path d="M88 238 C88 206 142 206 142 238Z" fill="#b8682e"/><path d="M98 222 Q115 212 132 222" stroke="#e8a060" stroke-width="3" fill="none"/>
+<path d="M104 196 C98 186 110 180 104 170 M118 194 C112 184 124 178 118 168" stroke="#fff" stroke-width="2.5" fill="none" opacity="0.5"/>
+<rect x="56" y="214" width="4" height="30" rx="2" fill="#c9c9cf"/><rect x="170" y="214" width="4" height="30" rx="2" fill="#c9c9cf"/>
+<path d="M186 246 C184 210 202 196 222 196 C242 196 260 210 258 246Z" fill="#6fd36f"/>
+<ellipse cx="208" cy="206" rx="8" ry="4" fill="#b8f5b8" opacity="0.7"/>
+<circle cx="212" cy="222" r="7" fill="#fff"/><circle cx="234" cy="222" r="7" fill="#fff"/><circle cx="214" cy="223" r="3.5" fill="#1d1d1d"/><circle cx="236" cy="223" r="3.5" fill="#1d1d1d"/>
+<path d="M216 234 Q223 240 230 234" stroke="#1d5a1d" stroke-width="2" fill="none"/>
+<path d="M248 182 L250 174 M240 180 L238 172 M256 188 L262 182" stroke="#ffd166" stroke-width="2"/>
+<rect x="0" y="287.5" width="300" height="112.5" fill="url(#band)"/>
+<line x1="70" y1="321.5" x2="240" y2="321.5" stroke="#8be08b" stroke-width="1.5" opacity="0.8"/>
+<g font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="bold" fill="#fffaf0" text-anchor="middle"><text x="155" y="359.5">Dungeon Diner</text></g>
+<text x="155" y="382" font-family="Georgia, 'Times New Roman', serif" font-size="13" font-style="italic" fill="#8be08b" text-anchor="middle" letter-spacing="1">alice</text>
+<rect x="0" y="0" width="10" height="400" fill="#000" opacity="0.28"/><rect x="10" y="0" width="1.5" height="400" fill="#fff" opacity="0.18"/>
+</svg>
